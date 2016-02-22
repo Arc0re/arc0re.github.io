@@ -4,7 +4,7 @@
 
 "use strict";
 
-alert( "Move with arrow keys, click'n'hold to move the camera. NO SHOOTING YET" );
+alert( "Move with arrow keys, click'n'hold to move the camera. No bullet collisions yet." );
 
 // Disable right click
 document.addEventListener( "contextmenu", function ( e ) {
