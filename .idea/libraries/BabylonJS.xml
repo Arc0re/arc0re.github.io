@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="BabylonJS" type="javaScript">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/js/babylon.2.3.js" />
+    </CLASSES>
+    <DOCUMENTATION>
+      <root url="http://doc.babylonjs.com/" />
+    </DOCUMENTATION>
+    <SOURCES />
+  </library>
+</component>

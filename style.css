@@ -1,0 +1,20 @@
+html, body {
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#shotgun {
+    position: absolute;
+    bottom: 0px;
+    left: 41%;
+    width: 240px;
+}
+
+#renderCanvas {
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+}

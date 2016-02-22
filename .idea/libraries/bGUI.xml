@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="bGUI" type="javaScript">
+    <properties>
+      <sourceFilesUrls>
+        <item url="file://$PROJECT_DIR$/js/utils/bGUI-1.3.1.js" />
+      </sourceFilesUrls>
+    </properties>
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/js/utils/bGUI-1.3.1.js" />
+    </CLASSES>
+    <SOURCES />
+  </library>
+</component>
