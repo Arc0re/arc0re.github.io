@@ -1,6 +1,8 @@
 # BABYDOOM
 ## Clone of DOOM using the JavaScript Babylon.js engine.
 
+[Azure hosting of the game](http://babydoom.azurewebsites.net/)
+
 Current features:
 
 + Random enemy placement
