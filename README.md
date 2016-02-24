@@ -13,6 +13,7 @@ Current features:
 
 TODO:
 
++ Cooldown on guns
 + Death animations for monsters
 + AI / Pathfinding
 + A real HUD, at least centered (don't tell me this one is)
@@ -21,3 +22,4 @@ TODO:
 + Fix buggy collisions
 + Add other enemies
 + Make fix levels? Or improved random placement of "walls".
++ Console to enter cheats and stuff like that?

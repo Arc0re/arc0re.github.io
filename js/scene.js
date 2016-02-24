@@ -2,41 +2,41 @@
  * Created by arc on 19/02/2016.
  */
 
-alert( "Move with arrow keys, click'n'hold to move the camera. Working bullet collisions, but buggy." );
+alert("Move with arrow keys, click'n'hold to move the camera. Working bullet collisions, but buggy.");
 
 // Disable right click
-document.addEventListener( "contextmenu", function ( e ) {
+document.addEventListener("contextmenu", function (e) {
     e.preventDefault();
-} );
+});
 
 // DEBUG: Turns off music and stuff
-var DEBUG = false;
+var DEBUG = true;
 
-if ( BABYLON.Engine.isSupported() ) {
+if (BABYLON.Engine.isSupported()) {
 
     // CONSTANTS
 
     var CUBE_SIZE = 5.5;
-    var CANVAS = document.getElementById( "renderCanvas" );
-    var ENGINE = new BABYLON.Engine( CANVAS, false ); // true = enable smoothing/antialiasing
+    var CANVAS = document.getElementById("renderCanvas");
+    var ENGINE = new BABYLON.Engine(CANVAS, false); // true = enable smoothing/antialiasing
     var SPRITES = []; // Array containing all the sprites
     var BULLETS = []; // Array containing all the bullets
 
     // UTILS
 
-    var getRandomInt = function ( min, max ) {
-        return Math.floor( Math.random() * (max - min) ) + min;
+    var getRandomInt = function (min, max) {
+        return Math.floor(Math.random() * (max - min)) + min;
     };
 
-    var getForwardVector = function ( rotation ) {
-        var rotationMatrix = BABYLON.Matrix.RotationYawPitchRoll( rotation.y, rotation.x, rotation.z );
-        return BABYLON.Vector3.TransformCoordinates( new BABYLON.Vector3( 0, 0, 1 ), rotationMatrix );
+    var getForwardVector = function (rotation) {
+        var rotationMatrix = BABYLON.Matrix.RotationYawPitchRoll(rotation.y, rotation.x, rotation.z);
+        return BABYLON.Vector3.TransformCoordinates(new BABYLON.Vector3(0, 0, 1), rotationMatrix);
     };
 
     // Thats because I'm lazy af
-    var LOG = function ( txt ) {
-        console.log( txt );
-    };
+    function LOG(txt) {
+        console.log(txt);
+    }
 
     // GAME
 
@@ -51,16 +51,17 @@ if ( BABYLON.Engine.isSupported() ) {
      * @param {boolean} isAnimated
      * @constructor
      */
-    var Monster = function ( scene, frames, animationDelay, number, type, cellSize, isAnimated ) {
-        // TODO: var self = this; HAXX
+    var Monster = function (scene, frames, animationDelay, number, type, cellSize, isAnimated) {
+        // TODO: HAXX var self = this;
         this.animationFrames = frames;
         this.animationDelay = animationDelay;
         this.numberOfUnits = number;
         this.type = type;
         this.cellSize = cellSize;
         this.isAnimated = isAnimated; // BOOL
+        var painSfx = new BABYLON.Sound("shotgunSfx", "snds/dspopain.wav", scene);
 
-        switch ( this.type ) {
+        switch (this.type) {
             case "imp":
                 this.spritePath = "gfx/doom/sheets/TMPimp_sheet.png";
                 break;
@@ -68,17 +69,17 @@ if ( BABYLON.Engine.isSupported() ) {
                 this.spritePath = "gfx/doomguy.png";
                 break;
             default:
-                LOG( "Wrong sprite name." );
+                LOG("Wrong sprite name.");
                 break;
         }
 
-        this.spriteManager = new BABYLON.SpriteManager( "spriteManager", this.spritePath, this.numberOfUnits, this.cellSize, scene );
+        this.spriteManager = new BABYLON.SpriteManager("spriteManager", this.spritePath, this.numberOfUnits, this.cellSize, scene);
         //this.sprite = new BABYLON.Sprite( "sprite", this.spriteManager );
         //this.sprite.checkCollisions = true;
 
-        this.billBoardPlane = new BABYLON.Mesh.CreatePlane( "plane", 3, scene );
-        this.material = new BABYLON.StandardMaterial( "billboardPlaneTxt", scene );
-        if ( DEBUG ) {
+        this.billBoardPlane = new BABYLON.Mesh.CreatePlane("plane", 3, scene);
+        this.material = new BABYLON.StandardMaterial("billboardPlaneTxt", scene);
+        if (DEBUG) {
             this.material.alpha = 0.4;
         } else {
             this.material.alpha = 0;
@@ -88,28 +89,28 @@ if ( BABYLON.Engine.isSupported() ) {
         this.billBoardPlane.checkCollisions = true;
         this.billBoardPlane.tag = "plane";
 
-        // EXP:
-        this.billBoardPlane.sprite = new BABYLON.Sprite( "sprite", this.spriteManager );
+        this.billBoardPlane.sprite = new BABYLON.Sprite("sprite", this.spriteManager);
         this.billBoardPlane.sprite.checkCollisions = true;
 
         this.render = function () {
-            if ( this.isAnimated ) {
-                this.billBoardPlane.sprite.playAnimation( 0, this.animationFrames, true, this.animationDelay );
+            if (this.isAnimated) {
+                this.billBoardPlane.sprite.playAnimation(0, this.animationFrames, true, this.animationDelay);
                 this.billBoardPlane.sprite.position.y = 1;
                 this.billBoardPlane.sprite.size = 2.5;
                 this.billBoardPlane.position = this.billBoardPlane.sprite.position;
-                SPRITES.push( this );
+                SPRITES.push(this);
             } else {
                 this.billBoardPlane.sprite.stopAnimation();
                 this.billBoardPlane.sprite.position.y = 1;
                 this.billBoardPlane.sprite.size = 2.5;
                 this.billBoardPlane.position = this.billBoardPlane.sprite.position;
-                SPRITES.push( this );
+                SPRITES.push(this);
             }
         };
 
-        // TODO: remove either this or the SPRITES.push()
-        //SPRITES = this.spriteManager.sprites;
+        this.suffer = function () {
+            painSfx.play();
+        };
 
 // this is good:
         //this.render = function () {
@@ -129,8 +130,9 @@ if ( BABYLON.Engine.isSupported() ) {
         //}
 
         this.dispose = function () {
-            this.billBoardPlane.dispose();
             this.billBoardPlane.sprite.dispose();
+            this.billBoardPlane.dispose();
+            LOG("monster instance deleted");
         };
     };
 
@@ -140,10 +142,10 @@ if ( BABYLON.Engine.isSupported() ) {
      * @param {BABYLON.Scene} scene
      * @constructor
      */
-    var Bullet = function ( camera, scene ) {
+    var Bullet = function (camera, scene) {
         var self = this; // HAXX
-        self.mesh = BABYLON.Mesh.CreateSphere( "bullet", 10, .1, scene );
-        self.mesh.material = new BABYLON.StandardMaterial( "bulletTexture", scene );
+        self.mesh = BABYLON.Mesh.CreateSphere("bullet", 10, .1, scene);
+        self.mesh.material = new BABYLON.StandardMaterial("bulletTexture", scene);
         self.mesh.position = camera.position.clone();
         self.mesh.material.alpha = 0;
         self.speed = 4;
@@ -152,13 +154,13 @@ if ( BABYLON.Engine.isSupported() ) {
         self.scene = scene;
         self.mesh.checkCollisions = true;
 
-        var direction = getForwardVector( camera.rotation );
+        var direction = getForwardVector(camera.rotation);
         direction.normalize();
 
         var deleteBullet = function () {
-            if ( self.isAlive ) {
-                if ( self.lifeDuration ) {
-                    window.clearTimeout( self.lifeDuration );
+            if (self.isAlive) {
+                if (self.lifeDuration) {
+                    window.clearTimeout(self.lifeDuration);
                 }
 
                 // Mesh destruction
@@ -169,9 +171,9 @@ if ( BABYLON.Engine.isSupported() ) {
         };
 
         // After X seconds, delete the bullet from the screen
-        self.lifeDuration = window.setTimeout( function () {
+        self.lifeDuration = window.setTimeout(function () {
             deleteBullet();
-        }, 1000 );
+        }, 1000);
 
         self.update = function () {
             // Moving the bullet according to the speed
@@ -202,10 +204,12 @@ if ( BABYLON.Engine.isSupported() ) {
             //
             //    }
             //}
-            for ( var i = 0; i < SPRITES.length; i++ ) {
-                if ( self.mesh.intersectsMesh( SPRITES[ i ].billBoardPlane, false ) ) {
-                    LOG( "TOUCHED MONSTER" );
-                    SPRITES[ i ].dispose();
+            for (var i = 0; i < SPRITES.length; i++) {
+                if (self.mesh.intersectsMesh(SPRITES[i].billBoardPlane, false)) {
+                    SPRITES[i].suffer();
+                    SPRITES[i].dispose();
+                    SPRITES.splice(i, 1);
+                    self.dispose();
                 }
             }
         };
@@ -215,42 +219,42 @@ if ( BABYLON.Engine.isSupported() ) {
         };
     };
 
-    var playBackgroundMusic = function ( scene ) {
-        return new BABYLON.Sound( "E1M1", "snds/E1M1.mp3", scene, null, { loop: true, autoplay: true } );
+    var playBackgroundMusic = function (scene) {
+        return new BABYLON.Sound("E1M1", "snds/E1M1.mp3", scene, null, {loop: true, autoplay: true});
     };
 
-    var genCubes = function ( scene ) {
-        var cubeMaterial = new BABYLON.StandardMaterial( "txtCube", scene );
-        cubeMaterial.diffuseTexture = new BABYLON.Texture( "gfx/doom/skulls.png", scene );
+    var genCubes = function (scene) {
+        var cubeMaterial = new BABYLON.StandardMaterial("txtCube", scene);
+        cubeMaterial.diffuseTexture = new BABYLON.Texture("gfx/doom/skulls.png", scene);
 
-        for ( var i = 0; i < 20; i++ ) {
-            var cube = new BABYLON.Mesh.CreateBox( "cube", CUBE_SIZE, scene );
+        for (var i = 0; i < 20; i++) {
+            var cube = new BABYLON.Mesh.CreateBox("cube", CUBE_SIZE, scene);
             cube.tag = "cube";
             // Random pos
-            cube.position = new BABYLON.Vector3( getRandomInt( 0, 50 ), CUBE_SIZE / 2, getRandomInt( 0, 50 ) );
+            cube.position = new BABYLON.Vector3(getRandomInt(0, 50), CUBE_SIZE / 2, getRandomInt(0, 50));
             cube.material = cubeMaterial;
             cube.checkCollisions = true;
         }
     };
 
-    var renderWeapon = function ( scene, camera ) {
-        var gun = BABYLON.Mesh.CreateBox( "gun", 1, scene );
-        gun.material = new BABYLON.StandardMaterial( "gunTxt", scene );
-        gun.material.diffuseTexture = new BABYLON.Texture( "gfx/grass.png", scene );
+    var renderWeapon = function (scene, camera) {
+        var gun = BABYLON.Mesh.CreateBox("gun", 1, scene);
+        gun.material = new BABYLON.StandardMaterial("gunTxt", scene);
+        gun.material.diffuseTexture = new BABYLON.Texture("gfx/grass.png", scene);
 
-        gun.scaling = new BABYLON.Vector3( .2, .2, .5 );
+        gun.scaling = new BABYLON.Vector3(.2, .2, .5);
         gun.position.x = .4;
         gun.position.y = -0.3;
         gun.position.z = 1;
         gun.parent = camera;
     };
 
-    var renderDoomguys = function ( scene ) {
-        for ( var i = 0; i < 10; i++ ) {
-            var doomguy = new Monster( scene, null, null, 10, "doomguy", 64, false );
+    var renderDoomguys = function (scene) {
+        for (var i = 0; i < 10; i++) {
+            var doomguy = new Monster(scene, null, null, 10, "doomguy", 64, false);
             doomguy.checkCollisions = true;
-            doomguy.billBoardPlane.sprite.position.x = getRandomInt( 0, 50 );
-            doomguy.billBoardPlane.sprite.position.z = getRandomInt( 0, 50 );
+            doomguy.billBoardPlane.sprite.position.x = getRandomInt(0, 50);
+            doomguy.billBoardPlane.sprite.position.z = getRandomInt(0, 50);
             doomguy.billBoardPlane.sprite.position.y = 1;
             doomguy.billBoardPlane.sprite.size = 2.5;
             doomguy.render();
@@ -267,15 +271,15 @@ if ( BABYLON.Engine.isSupported() ) {
         //}
     };
 
-    var renderAnimatedMonsters = function ( scene ) {
+    var renderAnimatedMonsters = function (scene) {
         var frames = 2;
         var delay = 300;
 
-        for ( var i = 0; i < 100; i++ ) {
-            var imp = new Monster( scene, frames, delay, 100, "imp", 64, true );
+        for (var i = 0; i < 100; i++) {
+            var imp = new Monster(scene, frames, delay, 100, "imp", 64, true);
             imp.checkCollisions = true;
-            imp.billBoardPlane.sprite.position.x = getRandomInt( 0, 50 );
-            imp.billBoardPlane.sprite.position.z = getRandomInt( 0, 50 );
+            imp.billBoardPlane.sprite.position.x = getRandomInt(0, 50);
+            imp.billBoardPlane.sprite.position.z = getRandomInt(0, 50);
             imp.render();
         }
         // WORKS:
@@ -289,61 +293,63 @@ if ( BABYLON.Engine.isSupported() ) {
     };
 
     var createScene = function () {
-        var scene = new BABYLON.Scene( ENGINE );
+        var scene = new BABYLON.Scene(ENGINE);
         scene.fogMode = BABYLON.Scene.FOGMODE_EXP;
-        scene.gravity = new BABYLON.Vector3( 0, -9.81, 0 );
+        scene.gravity = new BABYLON.Vector3(0, -9.81, 0);
         scene.collisionsEnabled = true;
 
-        var camera = new BABYLON.FreeCamera( 'camera', new BABYLON.Vector3( 0, 10, -20 ), scene );
+        var camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 10, -20), scene);
         camera.applyGravity = true;
         camera.checkCollisions = true;
-        camera.setTarget( BABYLON.Vector3.Zero() );
-        camera.attachControl( CANVAS, false );
+        camera.setTarget(BABYLON.Vector3.Zero());
+        camera.attachControl(CANVAS, false);
 
-        var light = new BABYLON.HemisphericLight( 'light', new BABYLON.Vector3( 0, 1, 0 ), scene );
+        var light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
 
-        var ground = BABYLON.Mesh.CreatePlane( 'ground', 500, scene );
+        var ground = BABYLON.Mesh.CreatePlane('ground', 500, scene);
         ground.tag = "ground";
         ground.rotation.x = Math.PI / 2; // TODO: simplify this (CreateGround())
         ground.checkCollisions = true;
-        ground.material = new BABYLON.StandardMaterial( "txtGround", scene );
-        ground.material.diffuseTexture = new BABYLON.Texture( "gfx/doom/acid.png", scene );
+        ground.material = new BABYLON.StandardMaterial("txtGround", scene);
+        ground.material.diffuseTexture = new BABYLON.Texture("gfx/doom/acid.png", scene);
         ground.material.diffuseTexture.uScale = 20.0;
         ground.material.diffuseTexture.vScale = 20.0;
 
-        genCubes( scene );
-        renderDoomguys( scene );
-        renderAnimatedMonsters( scene );
+        genCubes(scene);
+        renderDoomguys(scene);
+        renderAnimatedMonsters(scene);
 
 
-        if ( !DEBUG ) {
-            playBackgroundMusic( scene );
+        if (!DEBUG) {
+            playBackgroundMusic(scene);
         }
 
-        var shotgunSfx = new BABYLON.Sound( "shotgunSfx", "snds/dsshotgn.wav", scene );
-        window.addEventListener( "click", function ( e ) {
-            if ( e.button === 0 ) {
+        var shotgunSfx = new BABYLON.Sound("shotgunSfx", "snds/dsshotgn.wav", scene);
+        window.addEventListener("click", function (e) {
+            if (e.button === 0) {
                 shotgunSfx.play();
             }
 
-            var bullet = new Bullet( camera, scene );
-            BULLETS.push( bullet );
-        } );
-        LOG( "Line 291: " + SPRITES.length + " SPRITES" );
+            var bullet = new Bullet(camera, scene);
+            BULLETS.push(bullet);
+            LOG("Sprites remaining: " + SPRITES.length);
+        });
         return scene;
     };
 
     var scene = createScene();
 
-    ENGINE.runRenderLoop( function () {
-        for ( var i = 0; i < BULLETS.length; i++ ) {
-            BULLETS[ i ].update();
+    ENGINE.runRenderLoop(function () {
+        for (var i = 0; i < BULLETS.length; i++) {
+            BULLETS[i].update();
         }
 
         scene.render();
-    } );
+    });
+} else {
+    window.alert("YOUR BROWSER IS NOT SUPPORTED. YOU NEED A RECENT/MODERN WEBGL COMPATIBLE WEB BROWSER TO PLAY THIS GAME.");
 }
 
-window.addEventListener( 'resize', function () {
+window.addEventListener('resize', function () {
     ENGINE.resize();
-} );
+});
