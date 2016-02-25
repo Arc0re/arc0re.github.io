@@ -2,6 +2,8 @@
  * Created by arc on 19/02/2016.
  */
 
+var CANVAS = document.getElementById("renderCanvas");
+
 alert("Move with arrow keys, click'n'hold to move the camera. Working bullet collisions, but buggy.");
 
 // Disable right click
@@ -10,17 +12,17 @@ document.addEventListener("contextmenu", function (e) {
 });
 
 // DEBUG: Turns off music and stuff
-var DEBUG = true;
+var DEBUG = false;
 
 if (BABYLON.Engine.isSupported()) {
 
     // CONSTANTS
 
     var CUBE_SIZE = 5.5;
-    var CANVAS = document.getElementById("renderCanvas");
     var ENGINE = new BABYLON.Engine(CANVAS, false); // true = enable smoothing/antialiasing
     var SPRITES = []; // Array containing all the sprites
     var BULLETS = []; // Array containing all the bullets
+    var BULLET_SPEED = 1;
 
     // UTILS
 
@@ -77,33 +79,33 @@ if (BABYLON.Engine.isSupported()) {
         //this.sprite = new BABYLON.Sprite( "sprite", this.spriteManager );
         //this.sprite.checkCollisions = true;
 
-        this.billBoardPlane = new BABYLON.Mesh.CreatePlane("plane", 3, scene);
-        this.material = new BABYLON.StandardMaterial("billboardPlaneTxt", scene);
+        this.hitbox = new BABYLON.Mesh.CreatePlane("plane", 3, scene);
+        this.material = new BABYLON.StandardMaterial("hitboxTxt", scene);
         if (DEBUG) {
             this.material.alpha = 0.4;
         } else {
             this.material.alpha = 0;
         }
-        this.billBoardPlane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
-        this.billBoardPlane.material = this.material;
-        this.billBoardPlane.checkCollisions = true;
-        this.billBoardPlane.tag = "plane";
+        this.hitbox.billboardMode = BABYLON.Mesh.BILLBOARDMODE_Y; // ALL
+        this.hitbox.material = this.material;
+        this.hitbox.checkCollisions = true;
+        this.hitbox.tag = "plane";
 
-        this.billBoardPlane.sprite = new BABYLON.Sprite("sprite", this.spriteManager);
-        this.billBoardPlane.sprite.checkCollisions = true;
+        this.hitbox.sprite = new BABYLON.Sprite("sprite", this.spriteManager);
+        this.hitbox.sprite.checkCollisions = true;
 
         this.render = function () {
             if (this.isAnimated) {
-                this.billBoardPlane.sprite.playAnimation(0, this.animationFrames, true, this.animationDelay);
-                this.billBoardPlane.sprite.position.y = 1;
-                this.billBoardPlane.sprite.size = 2.5;
-                this.billBoardPlane.position = this.billBoardPlane.sprite.position;
+                this.hitbox.sprite.playAnimation(0, this.animationFrames, true, this.animationDelay);
+                this.hitbox.sprite.position.y = 1;
+                this.hitbox.sprite.size = 2.5;
+                this.hitbox.position = this.hitbox.sprite.position;
                 SPRITES.push(this);
             } else {
-                this.billBoardPlane.sprite.stopAnimation();
-                this.billBoardPlane.sprite.position.y = 1;
-                this.billBoardPlane.sprite.size = 2.5;
-                this.billBoardPlane.position = this.billBoardPlane.sprite.position;
+                this.hitbox.sprite.stopAnimation();
+                this.hitbox.sprite.position.y = 1;
+                this.hitbox.sprite.size = 2.5;
+                this.hitbox.position = this.hitbox.sprite.position;
                 SPRITES.push(this);
             }
         };
@@ -118,20 +120,20 @@ if (BABYLON.Engine.isSupported()) {
         //        this.sprite.playAnimation( 0, this.animationFrames, true, this.animationDelay );
         //        this.sprite.position.y = 1;
         //        this.sprite.size = 2.5;
-        //        this.billBoardPlane.position = this.sprite.position;
+        //        this.hitbox.position = this.sprite.position;
         //        SPRITES.push( this );
         //    } else {
         //        this.sprite.stopAnimation();
         //        this.sprite.position.y = 1;
         //        this.sprite.size = 2.5;
-        //        this.billBoardPlane.position = this.sprite.position;
+        //        this.hitbox.position = this.sprite.position;
         //        SPRITES.push( this );
         //    }
         //}
 
         this.dispose = function () {
-            this.billBoardPlane.sprite.dispose();
-            this.billBoardPlane.dispose();
+            this.hitbox.sprite.dispose();
+            this.hitbox.dispose();
             LOG("monster instance deleted");
         };
     };
@@ -148,7 +150,7 @@ if (BABYLON.Engine.isSupported()) {
         self.mesh.material = new BABYLON.StandardMaterial("bulletTexture", scene);
         self.mesh.position = camera.position.clone();
         self.mesh.material.alpha = 0;
-        self.speed = 4;
+        self.speed = BULLET_SPEED;
         self.isAlive = true;
         self.lifeDuration = null; // How long will the bullet stay "alive"
         self.scene = scene;
@@ -171,11 +173,16 @@ if (BABYLON.Engine.isSupported()) {
         };
 
         // After X seconds, delete the bullet from the screen
-        self.lifeDuration = window.setTimeout(function () {
+        self.lifeDuration = setTimeout(function () {
             deleteBullet();
+            BULLETS.splice(self, 1);
         }, 1000);
 
         self.update = function () {
+            if (!self.isAlive) {
+                return false;
+            }
+
             // Moving the bullet according to the speed
             self.mesh.position.x += direction.x * self.speed;
             self.mesh.position.y += direction.y * self.speed;
@@ -192,7 +199,7 @@ if (BABYLON.Engine.isSupported()) {
             //            LOG( "TOUCHED PLANE" );
             //            self.scene.meshes[ i ].dispose();
             //
-            //            //if ( SPRITES[ i ].billBoardPlane === undefined ) {
+            //            //if ( SPRITES[ i ].hitbox === undefined ) {
             //            //    SPRITES[ i ].dispose();
             //            //    SPRITES.splice( i, 1 );
             //            //}
@@ -205,13 +212,15 @@ if (BABYLON.Engine.isSupported()) {
             //    }
             //}
             for (var i = 0; i < SPRITES.length; i++) {
-                if (self.mesh.intersectsMesh(SPRITES[i].billBoardPlane, false)) {
+                if (self.mesh.intersectsMesh(SPRITES[i].hitbox, false)) {
                     SPRITES[i].suffer();
                     SPRITES[i].dispose();
                     SPRITES.splice(i, 1);
                     self.dispose();
+                    return true;
                 }
             }
+            return false;
         };
 
         self.dispose = function () {
@@ -253,10 +262,10 @@ if (BABYLON.Engine.isSupported()) {
         for (var i = 0; i < 10; i++) {
             var doomguy = new Monster(scene, null, null, 10, "doomguy", 64, false);
             doomguy.checkCollisions = true;
-            doomguy.billBoardPlane.sprite.position.x = getRandomInt(0, 50);
-            doomguy.billBoardPlane.sprite.position.z = getRandomInt(0, 50);
-            doomguy.billBoardPlane.sprite.position.y = 1;
-            doomguy.billBoardPlane.sprite.size = 2.5;
+            doomguy.hitbox.sprite.position.x = getRandomInt(0, 50);
+            doomguy.hitbox.sprite.position.z = getRandomInt(0, 50);
+            doomguy.hitbox.sprite.position.y = 1;
+            doomguy.hitbox.sprite.size = 2.5;
             doomguy.render();
         }
         // Works:
@@ -278,8 +287,8 @@ if (BABYLON.Engine.isSupported()) {
         for (var i = 0; i < 100; i++) {
             var imp = new Monster(scene, frames, delay, 100, "imp", 64, true);
             imp.checkCollisions = true;
-            imp.billBoardPlane.sprite.position.x = getRandomInt(0, 50);
-            imp.billBoardPlane.sprite.position.z = getRandomInt(0, 50);
+            imp.hitbox.sprite.position.x = getRandomInt(0, 50);
+            imp.hitbox.sprite.position.z = getRandomInt(0, 50);
             imp.render();
         }
         // WORKS:
@@ -293,6 +302,8 @@ if (BABYLON.Engine.isSupported()) {
     };
 
     var createScene = function () {
+        ENGINE.isPointerLock = true;
+
         var scene = new BABYLON.Scene(ENGINE);
         scene.fogMode = BABYLON.Scene.FOGMODE_EXP;
         scene.gravity = new BABYLON.Vector3(0, -9.81, 0);
@@ -303,6 +314,20 @@ if (BABYLON.Engine.isSupported()) {
         camera.checkCollisions = true;
         camera.setTarget(BABYLON.Vector3.Zero());
         camera.attachControl(CANVAS, false);
+        if (DEBUG) {
+            // TODO: keyboard layout selection
+            // QWERTY (master race)
+            camera.keysUp = [87];
+            camera.keysLeft = [65];
+            camera.keysRight = [68];
+            camera.keysDown = [83];
+        } else {
+            // AZERTY
+            camera.keysUp = [90];
+            camera.keysLeft = [81];
+            camera.keysRight = [68];
+            camera.keysDown = [83];
+        }
 
         var light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
 
@@ -319,7 +344,6 @@ if (BABYLON.Engine.isSupported()) {
         renderDoomguys(scene);
         renderAnimatedMonsters(scene);
 
-
         if (!DEBUG) {
             playBackgroundMusic(scene);
         }
@@ -334,14 +358,22 @@ if (BABYLON.Engine.isSupported()) {
             BULLETS.push(bullet);
             LOG("Sprites remaining: " + SPRITES.length);
         });
+
         return scene;
     };
 
     var scene = createScene();
 
     ENGINE.runRenderLoop(function () {
+        //for (var i = 0; i < BULLETS.length; i++) {
+        //    BULLETS[i].update();
+        //}
+        LOG("BULLETS ON SCREEN: " + BULLETS.length);
         for (var i = 0; i < BULLETS.length; i++) {
-            BULLETS[i].update();
+            if (BULLETS[i].update()) {
+                BULLETS[i].dispose();
+                BULLETS.splice(i, 1);
+            }
         }
 
         scene.render();

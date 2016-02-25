@@ -9,17 +9,19 @@ Current features:
 + Sprite animation
 + Random "world" generation (wall placement)
 + Gun shot
-+ Bullet collisions (buggy though)
++ Bullet collisions
 
 TODO:
 
++ Prevent sprites from spawning inside the cubes
++ Fix starting position
 + Cooldown on guns
 + Death animations for monsters
 + AI / Pathfinding
 + A real HUD, at least centered (don't tell me this one is)
 + Add weapons?
 + DOOM's original shotgun behaviour (more than 1 pellet)
-+ Fix buggy collisions
++ Fix buggy collisions [x]
 + Add other enemies
 + Make fix levels? Or improved random placement of "walls".
 + Console to enter cheats and stuff like that?
