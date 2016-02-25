@@ -12,7 +12,7 @@ document.addEventListener("contextmenu", function (e) {
 });
 
 // DEBUG: Turns off music and stuff
-var DEBUG = false;
+var DEBUG = true;
 
 if (BABYLON.Engine.isSupported()) {
 
@@ -23,6 +23,7 @@ if (BABYLON.Engine.isSupported()) {
     var SPRITES = []; // Array containing all the sprites
     var BULLETS = []; // Array containing all the bullets
     var BULLET_SPEED = 1;
+    var SHOTGUN_BULLET_SIZE = 3; // Should be lots of little pellets, but one big bullet does the trick
 
     // UTILS
 
@@ -114,23 +115,6 @@ if (BABYLON.Engine.isSupported()) {
             painSfx.play();
         };
 
-// this is good:
-        //this.render = function () {
-        //    if ( this.isAnimated ) {
-        //        this.sprite.playAnimation( 0, this.animationFrames, true, this.animationDelay );
-        //        this.sprite.position.y = 1;
-        //        this.sprite.size = 2.5;
-        //        this.hitbox.position = this.sprite.position;
-        //        SPRITES.push( this );
-        //    } else {
-        //        this.sprite.stopAnimation();
-        //        this.sprite.position.y = 1;
-        //        this.sprite.size = 2.5;
-        //        this.hitbox.position = this.sprite.position;
-        //        SPRITES.push( this );
-        //    }
-        //}
-
         this.dispose = function () {
             this.hitbox.sprite.dispose();
             this.hitbox.dispose();
@@ -146,10 +130,14 @@ if (BABYLON.Engine.isSupported()) {
      */
     var Bullet = function (camera, scene) {
         var self = this; // HAXX
-        self.mesh = BABYLON.Mesh.CreateSphere("bullet", 10, .1, scene);
+        self.mesh = BABYLON.Mesh.CreateSphere("bullet", 3, SHOTGUN_BULLET_SIZE, scene);
         self.mesh.material = new BABYLON.StandardMaterial("bulletTexture", scene);
         self.mesh.position = camera.position.clone();
-        self.mesh.material.alpha = 0;
+        if (DEBUG) {
+            self.mesh.material.alpha = 0.8;
+        } else {
+            self.mesh.material.alpha = 0;
+        }
         self.speed = BULLET_SPEED;
         self.isAlive = true;
         self.lifeDuration = null; // How long will the bullet stay "alive"
@@ -268,16 +256,6 @@ if (BABYLON.Engine.isSupported()) {
             doomguy.hitbox.sprite.size = 2.5;
             doomguy.render();
         }
-        // Works:
-        //for ( var i = 0; i < 10; i++ ) {
-        //    var doomguy = new Monster( scene, null, null, 10, "doomguy", 64, false );
-        //    doomguy.checkCollisions = true;
-        //    doomguy.sprite.position.x = getRandomInt( 0, 50 );
-        //    doomguy.sprite.position.z = getRandomInt( 0, 50 );
-        //    doomguy.sprite.position.y = 1;
-        //    doomguy.sprite.size = 2.5;
-        //    doomguy.render();
-        //}
     };
 
     var renderAnimatedMonsters = function (scene) {
@@ -291,14 +269,6 @@ if (BABYLON.Engine.isSupported()) {
             imp.hitbox.sprite.position.z = getRandomInt(0, 50);
             imp.render();
         }
-        // WORKS:
-        //for ( var i = 0; i < 100; i++ ) {
-        //    var imp = new Monster( scene, frames, delay, 100, "imp", 64, true );
-        //    imp.checkCollisions = true;
-        //    imp.sprite.position.x = getRandomInt( 0, 50 );
-        //    imp.sprite.position.z = getRandomInt( 0, 50 );
-        //    imp.render();
-        //}
     };
 
     var createScene = function () {
@@ -365,9 +335,6 @@ if (BABYLON.Engine.isSupported()) {
     var scene = createScene();
 
     ENGINE.runRenderLoop(function () {
-        //for (var i = 0; i < BULLETS.length; i++) {
-        //    BULLETS[i].update();
-        //}
         LOG("BULLETS ON SCREEN: " + BULLETS.length);
         for (var i = 0; i < BULLETS.length; i++) {
             if (BULLETS[i].update()) {
