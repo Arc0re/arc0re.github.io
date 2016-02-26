@@ -146,14 +146,24 @@ if (BABYLON.Engine.isSupported()) {
                     case 1:
                     case 2:
                     case 3:
-                        this.playAnimation(3, 7, 150); // death animation
+                        switch (this.type) {
+                            case "imp":
+                                this.playAnimation(3, 7, 150); // death animation
+                                break;
+                            case "marine":
+                                this.playAnimation(3, 8, 150);
+                                break;
+                        }
                         break;
                     case 4:
                     case 5:
-                        if (this.type === "marine") {
-                            this.playAnimation(3, 8, 150);
-                        } else if (this.type === "imp") {
-                            this.playAnimation(8, 15, 150); // death animation
+                        switch (this.type) {
+                            case "imp":
+                                this.playAnimation(8, 15, 150); // death animation
+                                break;
+                            case "marine":
+                                this.playAnimation(9, 16, 150);
+                                break;
                         }
                         break;
                 }
