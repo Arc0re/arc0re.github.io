@@ -9,15 +9,17 @@ html, body {
 #crosshair {
     position: absolute;
     top: 50%;
-    bottom: 50%;
-    left: 49%;
+    left: 50%;
+    margin-top: -8px;
+    margin-left: -8px;
 }
 
 #shotgun {
     position: absolute;
-    bottom: 0px;
-    left: 41%;
     width: 240px;
+    bottom: 0;
+    left: 50%;
+    margin-left: -127px;
 }
 
 #renderCanvas {

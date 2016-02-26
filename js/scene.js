@@ -3,8 +3,16 @@
  */
 
 var CANVAS = document.getElementById("renderCanvas");
+var KB_LAYOUT = "AZERTY";
 
-alert("Move with arrow keys, click'n'hold to move the camera. Working bullet collisions, but buggy.");
+if (confirm("Would you like to use a QWERTY layout?")) {
+    console.log("Keyboard layout set to QWERTY");
+    KB_LAYOUT = "QWERTY";
+} else {
+    console.log("Keyboard layout defaults to AZERTY");
+}
+
+alert("Move with either WASD or ZQSD, use the mouse to move the camera. Before loading, keep the mouse pointer near the crosshair.");
 
 // Disable right click
 document.addEventListener("contextmenu", function (e) {
@@ -12,7 +20,7 @@ document.addEventListener("contextmenu", function (e) {
 });
 
 // DEBUG: Turns off music and stuff
-var DEBUG = true;
+var DEBUG = false;
 
 if (BABYLON.Engine.isSupported()) {
 
@@ -284,8 +292,7 @@ if (BABYLON.Engine.isSupported()) {
         camera.checkCollisions = true;
         camera.setTarget(BABYLON.Vector3.Zero());
         camera.attachControl(CANVAS, false);
-        if (DEBUG) {
-            // TODO: keyboard layout selection
+        if (KB_LAYOUT === "QWERTY") {
             // QWERTY (master race)
             camera.keysUp = [87];
             camera.keysLeft = [65];

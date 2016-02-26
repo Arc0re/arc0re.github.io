@@ -10,9 +10,11 @@ Current features:
 + Random "world" generation (wall placement)
 + Gun shot
 + Bullet collisions
++ Keyboard layout selection
 
 TODO:
 
++ Better stuff than a couple of alert() at loading
 + Prevent sprites from spawning inside the cubes
 + Fix starting position
 + Cooldown on guns
