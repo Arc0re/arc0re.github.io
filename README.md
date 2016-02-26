@@ -34,6 +34,10 @@ TODO:
 + Make fix levels? Or improved random placement of "walls".
 + Console to enter cheats and stuff like that?
 
+Thanks a lot Demonixis, if you ever come across this repo, your [micro fps tutorial](http://www.demonixis.net/blog/un-micro-fps-en-javascript-avec-babylonjs/)
+has been very useful. (And I even borrowed some of your stuff like the getForwardVector() function).
+
+
 ## DISCLAIMER
 
 NONE OF THE ASSETS USED ARE MINE. ALL THE GRAPHICS AND SOUNDS ARE PROPERTY OF ID SOFTWARE (aka BETHESDA).
