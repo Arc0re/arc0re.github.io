@@ -19,7 +19,7 @@ document.addEventListener("contextmenu", function (e) {
     e.preventDefault();
 });
 
-// DEBUG: Turns off music and stuff
+// DEBUG: Turns off music, shows hitboxes, and bullet mesh
 var DEBUG = false;
 
 if (BABYLON.Engine.isSupported()) {
