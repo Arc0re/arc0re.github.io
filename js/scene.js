@@ -20,7 +20,7 @@ document.addEventListener("contextmenu", function (e) {
 });
 
 // DEBUG: Turns off music, shows hitboxes, and bullet mesh
-var DEBUG = true;
+var DEBUG = false;
 
 if (BABYLON.Engine.isSupported()) {
 
@@ -32,6 +32,11 @@ if (BABYLON.Engine.isSupported()) {
     var BULLETS = []; // Array containing all the bullets
     var BULLET_SPEED = 1;
     var SHOTGUN_BULLET_SIZE = 3; // Should be lots of little pellets, but one big bullet does the trick
+    var MUSIC_VOLUME = 0.1;
+
+    // MONSTER CONSTANTS
+    var IMP_MAX_HP = 10;
+    var MARINE_MAX_HP = 5;
 
     // UTILS
 
@@ -72,6 +77,7 @@ if (BABYLON.Engine.isSupported()) {
         this.animationDelay = animationDelay;
         this.numberOfUnits = number;
         this.type = type;
+        this.health = IMP_MAX_HP;
         this.cellSize = cellSize;
         this.isAnimated = isAnimated; // BOOL
         var painSfx = new BABYLON.Sound("shotgunSfx", "snds/dspopain.wav", scene);
@@ -82,6 +88,9 @@ if (BABYLON.Engine.isSupported()) {
                 break;
             case "doomguy":
                 this.spritePath = "gfx/doomguy.png";
+                break;
+            case "marine":
+                this.spritePath = "gfx/doom/sheets/marine_anims.png";
                 break;
             default:
                 LOG("Wrong sprite name.");
@@ -141,7 +150,11 @@ if (BABYLON.Engine.isSupported()) {
                         break;
                     case 4:
                     case 5:
-                        this.playAnimation(8, 15, 150); // death animation
+                        if (this.type === "marine") {
+                            this.playAnimation(3, 8, 150);
+                        } else if (this.type === "imp") {
+                            this.playAnimation(8, 15, 150); // death animation
+                        }
                         break;
                 }
             }
@@ -234,7 +247,6 @@ if (BABYLON.Engine.isSupported()) {
             for (var i = 0; i < SPRITES.length; i++) {
                 if (self.mesh.intersectsMesh(SPRITES[i].hitbox, false)) {
                     SPRITES[i].suffer();
-                    //SPRITES[i].
                     SPRITES[i].dispose();
                     SPRITES.splice(i, 1);
                     self.dispose();
@@ -250,7 +262,11 @@ if (BABYLON.Engine.isSupported()) {
     };
 
     var playBackgroundMusic = function (scene) {
-        return new BABYLON.Sound("E1M1", "snds/E1M1.mp3", scene, null, {loop: true, autoplay: true});
+        return new BABYLON.Sound("E1M1", "snds/E1M1.mp3", scene, null, {
+            loop: true,
+            autoplay: true,
+            volume: MUSIC_VOLUME
+        });
     };
 
     var genCubes = function (scene) {
@@ -295,12 +311,25 @@ if (BABYLON.Engine.isSupported()) {
         var frames = 2; //2
         var delay = 200; // 300
 
-        for (var i = 0; i < 100; i++) {
+        for (var i = 0; i < 30; i++) {
             var imp = new Monster(scene, frames, delay, 100, "imp", 64, true);
             imp.checkCollisions = true;
             imp.hitbox.sprite.position.x = getRandomInt(0, 50);
             imp.hitbox.sprite.position.z = getRandomInt(0, 50);
             imp.render();
+        }
+    };
+
+    var renderAnimatedMarines = function (scene) {
+        var frames = 3;
+        var delay = 300;
+
+        for (var i = 0; i < 40; i++) {
+            var marine = new Monster(scene, frames, delay, 100, "marine", 64, true);
+            marine.checkCollisions = true;
+            marine.hitbox.sprite.position.x = getRandomInt(0, 50);
+            marine.hitbox.sprite.position.z = getRandomInt(0, 50);
+            marine.render();
         }
     };
 
@@ -345,6 +374,7 @@ if (BABYLON.Engine.isSupported()) {
         genCubes(scene);
         //renderDoomguys(scene);
         renderAnimatedMonsters(scene);
+        renderAnimatedMarines(scene);
 
         if (!DEBUG) {
             playBackgroundMusic(scene);
