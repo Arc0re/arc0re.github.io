@@ -343,8 +343,10 @@ if (BABYLON.Engine.isSupported()) {
         }
     };
 
+    // ============================================================================================================================
+    // ============================================================================================================================
     var createScene = function () {
-        ENGINE.isPointerLock = true;
+        //ENGINE.isPointerLock = true;
 
         var scene = new BABYLON.Scene(ENGINE);
         scene.fogMode = BABYLON.Scene.FOGMODE_EXP;
@@ -369,6 +371,28 @@ if (BABYLON.Engine.isSupported()) {
             camera.keysRight = [68];
             camera.keysDown = [83];
         }
+
+        // Request pointer lock
+        var canvas = ENGINE.getRenderingCanvas();
+        canvas.addEventListener("click", function (evt) {
+            canvas.requestPointerLock = canvas.requestPointerLock || canvas.msRequestPointerLock || canvas.mozRequestPointerLock || canvas.webkitRequestPointerLock;
+            if (canvas.requestPointerLock) {
+                canvas.requestPointerLock();
+            }
+        }, false);
+        // Event listener when the pointerlock event is updated.
+        var pointerLockChange = function (event) {
+            _this.controlEnabled = (document.mozPointerLockElement === canvas || document.webkitPointerLockElement === canvas || document.msPointerLockElement === canvas || document.pointerLockElement === canvas);
+            if (!_this.controlEnabled) {
+                _this.camera.detachControl(canvas);
+            } else {
+                _this.camera.attachControl(canvas);
+            }
+        };
+        document.addEventListener("pointerlockchange", pointerLockChange, false);
+        document.addEventListener("mspointerlockchange", pointerLockChange, false);
+        document.addEventListener("mozpointerlockchange", pointerLockChange, false);
+        document.addEventListener("webkitpointerlockchange", pointerLockChange, false);
 
         var light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
 
