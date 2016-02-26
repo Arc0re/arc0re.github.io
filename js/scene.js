@@ -20,7 +20,7 @@ document.addEventListener("contextmenu", function (e) {
 });
 
 // DEBUG: Turns off music, shows hitboxes, and bullet mesh
-var DEBUG = false;
+var DEBUG = true;
 
 if (BABYLON.Engine.isSupported()) {
 
@@ -49,6 +49,10 @@ if (BABYLON.Engine.isSupported()) {
         console.log(txt);
     }
 
+    function randomIntFromInterval(min, max) {
+        return Math.floor(Math.random() * (max - min + 1) + min);
+    }
+
     // GAME
 
     /**
@@ -63,7 +67,7 @@ if (BABYLON.Engine.isSupported()) {
      * @constructor
      */
     var Monster = function (scene, frames, animationDelay, number, type, cellSize, isAnimated) {
-        // TODO: HAXX var self = this;
+        var self = this;
         this.animationFrames = frames;
         this.animationDelay = animationDelay;
         this.numberOfUnits = number;
@@ -74,7 +78,7 @@ if (BABYLON.Engine.isSupported()) {
 
         switch (this.type) {
             case "imp":
-                this.spritePath = "gfx/doom/sheets/TMPimp_sheet.png";
+                this.spritePath = "gfx/doom/sheets/imp_anims.png";
                 break;
             case "doomguy":
                 this.spritePath = "gfx/doomguy.png";
@@ -85,8 +89,6 @@ if (BABYLON.Engine.isSupported()) {
         }
 
         this.spriteManager = new BABYLON.SpriteManager("spriteManager", this.spritePath, this.numberOfUnits, this.cellSize, scene);
-        //this.sprite = new BABYLON.Sprite( "sprite", this.spriteManager );
-        //this.sprite.checkCollisions = true;
 
         this.hitbox = new BABYLON.Mesh.CreatePlane("plane", 3, scene);
         this.material = new BABYLON.StandardMaterial("hitboxTxt", scene);
@@ -119,14 +121,36 @@ if (BABYLON.Engine.isSupported()) {
             }
         };
 
+        this.playAnimation = function (from, to, delay) {
+            this.hitbox.sprite.playAnimation(from, to, false, delay);
+            LOG("ANIMATION PLAYED");
+        };
+
         this.suffer = function () {
             painSfx.play();
         };
 
         this.dispose = function () {
-            this.hitbox.sprite.dispose();
-            this.hitbox.dispose();
-            LOG("monster instance deleted");
+            if (this.isAnimated) {
+                var rnum = randomIntFromInterval(1, 5);
+                switch (rnum) {
+                    case 1:
+                    case 2:
+                    case 3:
+                        this.playAnimation(3, 7, 150); // death animation
+                        break;
+                    case 4:
+                    case 5:
+                        this.playAnimation(8, 15, 150); // death animation
+                        break;
+                }
+            }
+
+            setTimeout(function () {
+                self.hitbox.sprite.dispose();
+                self.hitbox.dispose();
+                LOG("monster instance deleted");
+            }, 5000);
         };
     };
 
@@ -210,6 +234,7 @@ if (BABYLON.Engine.isSupported()) {
             for (var i = 0; i < SPRITES.length; i++) {
                 if (self.mesh.intersectsMesh(SPRITES[i].hitbox, false)) {
                     SPRITES[i].suffer();
+                    //SPRITES[i].
                     SPRITES[i].dispose();
                     SPRITES.splice(i, 1);
                     self.dispose();
@@ -267,8 +292,8 @@ if (BABYLON.Engine.isSupported()) {
     };
 
     var renderAnimatedMonsters = function (scene) {
-        var frames = 2;
-        var delay = 300;
+        var frames = 2; //2
+        var delay = 200; // 300
 
         for (var i = 0; i < 100; i++) {
             var imp = new Monster(scene, frames, delay, 100, "imp", 64, true);
@@ -318,7 +343,7 @@ if (BABYLON.Engine.isSupported()) {
         ground.material.diffuseTexture.vScale = 20.0;
 
         genCubes(scene);
-        renderDoomguys(scene);
+        //renderDoomguys(scene);
         renderAnimatedMonsters(scene);
 
         if (!DEBUG) {
