@@ -1,5 +1,5 @@
 # BABYDOOM
-## Clone of DOOM using the JavaScript Babylon.js engine.
+## Clone of DOOM using the JavaScript [Babylon.js](http://www.babylonjs.com/) engine.
 
 [Azure hosting of the game](http://babydoom.azurewebsites.net/)
 

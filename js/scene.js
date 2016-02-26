@@ -14,7 +14,7 @@ if (confirm("Would you like to use a QWERTY layout?")) {
 
 alert("Move with either WASD or ZQSD, use the mouse to move the camera. Before loading, keep the mouse pointer near the crosshair.");
 
-// Disable right click
+// Disable right click menu
 document.addEventListener("contextmenu", function (e) {
     e.preventDefault();
 });
@@ -346,8 +346,6 @@ if (BABYLON.Engine.isSupported()) {
     // ============================================================================================================================
     // ============================================================================================================================
     var createScene = function () {
-        //ENGINE.isPointerLock = true;
-
         var scene = new BABYLON.Scene(ENGINE);
         scene.fogMode = BABYLON.Scene.FOGMODE_EXP;
         scene.gravity = new BABYLON.Vector3(0, -9.81, 0);
@@ -358,6 +356,7 @@ if (BABYLON.Engine.isSupported()) {
         camera.checkCollisions = true;
         camera.setTarget(BABYLON.Vector3.Zero());
         camera.attachControl(CANVAS, false);
+
         if (KB_LAYOUT === "QWERTY") {
             // QWERTY (master race)
             camera.keysUp = [87];
@@ -382,6 +381,7 @@ if (BABYLON.Engine.isSupported()) {
         }, false);
         // Event listener when the pointerlock event is updated.
         var pointerLockChange = function (event) {
+            // TODO: use actual this or self, fucking js
             _this.controlEnabled = (document.mozPointerLockElement === canvas || document.webkitPointerLockElement === canvas || document.msPointerLockElement === canvas || document.pointerLockElement === canvas);
             if (!_this.controlEnabled) {
                 _this.camera.detachControl(canvas);
@@ -406,7 +406,6 @@ if (BABYLON.Engine.isSupported()) {
         ground.material.diffuseTexture.vScale = 20.0;
 
         genCubes(scene);
-        //renderDoomguys(scene);
         renderAnimatedMonsters(scene);
         renderAnimatedMarines(scene);
 
@@ -442,7 +441,7 @@ if (BABYLON.Engine.isSupported()) {
         scene.render();
     });
 } else {
-    window.alert("YOUR BROWSER IS NOT SUPPORTED. YOU NEED A RECENT/MODERN WEBGL COMPATIBLE WEB BROWSER TO PLAY THIS GAME.");
+    alert("YOUR BROWSER IS NOT SUPPORTED. YOU NEED A RECENT/MODERN WEBGL COMPATIBLE WEB BROWSER TO PLAY THIS GAME.");
 }
 
 window.addEventListener('resize', function () {
