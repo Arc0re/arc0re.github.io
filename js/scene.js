@@ -54,10 +54,6 @@ if (BABYLON.Engine.isSupported()) {
         console.log(txt);
     }
 
-    function randomIntFromInterval(min, max) {
-        return Math.floor(Math.random() * (max - min + 1) + min);
-    }
-
     // GAME
 
     /**
@@ -141,7 +137,7 @@ if (BABYLON.Engine.isSupported()) {
 
         this.dispose = function () {
             if (this.isAnimated) {
-                var rnum = randomIntFromInterval(1, 5);
+                var rnum = getRandomInt(1, 5);
                 switch (rnum) {
                     case 1:
                     case 2:
