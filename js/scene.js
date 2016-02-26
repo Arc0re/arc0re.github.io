@@ -289,6 +289,7 @@ if (BABYLON.Engine.isSupported()) {
         }
     };
 
+    // Unused.
     var renderWeapon = function (scene, camera) {
         var gun = BABYLON.Mesh.CreateBox("gun", 1, scene);
         gun.material = new BABYLON.StandardMaterial("gunTxt", scene);
@@ -377,12 +378,11 @@ if (BABYLON.Engine.isSupported()) {
         }, false);
         // Event listener when the pointerlock event is updated.
         var pointerLockChange = function (event) {
-            // TODO: use actual this or self, fucking js
-            _this.controlEnabled = (document.mozPointerLockElement === canvas || document.webkitPointerLockElement === canvas || document.msPointerLockElement === canvas || document.pointerLockElement === canvas);
-            if (!_this.controlEnabled) {
-                _this.camera.detachControl(canvas);
+            this.controlEnabled = (document.mozPointerLockElement === canvas || document.webkitPointerLockElement === canvas || document.msPointerLockElement === canvas || document.pointerLockElement === canvas);
+            if (this.controlEnabled) {
+                this.camera.detachControl(canvas);
             } else {
-                _this.camera.attachControl(canvas);
+                this.camera.attachControl(canvas);
             }
         };
         document.addEventListener("pointerlockchange", pointerLockChange, false);
