@@ -12,7 +12,7 @@ if (confirm("Would you like to use a QWERTY layout?")) {
     console.log("Keyboard layout defaults to AZERTY");
 }
 
-alert("Move with either WASD or ZQSD, use the mouse to move the camera. Before loading, keep the mouse pointer near the crosshair.");
+alert("Move with either WASD (QWERTY) or ZQSD(AZERTY), click the game screen once for it to grab your mouse. Escape to free the pointer. THIS IS AN EARLY EARLY ALPHA");
 
 // Disable right click menu
 document.addEventListener("contextmenu", function (e) {
